@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 /// <summary>
 /// Controlls the HelloAR example.
 /// </summary>
-public class HelloARController : MonoBehaviour {
+public class AndysController : MonoBehaviour {
   /// <summary>
   /// The first-person camera being used to render the passthrough camera.
   /// </summary>
@@ -22,7 +22,7 @@ public class HelloARController : MonoBehaviour {
   /// </summary>
   public GameObject m_andyAndroidPrefab;
 
-  public GameObject lastAndy;
+  public List<PlaneAttachment> andys = new List<PlaneAttachment>();
 
   /// <summary>
   /// A gameobject parenting UI for displaying the "searching for planes" snackbar.
@@ -110,38 +110,42 @@ public class HelloARController : MonoBehaviour {
 
       // Intanstiate an Andy Android object as a child of the anchor; it's transform will now benefit
       // from the anchor's tracking.
-      lastAndy = Instantiate(m_andyAndroidPrefab, hit.Point, Quaternion.identity,
-        anchor.transform);
+      PlaneAttachment andy = Instantiate(m_andyAndroidPrefab, hit.Point, Quaternion.identity,
+        anchor.transform).GetComponent<PlaneAttachment>();
+      andys.Add(andy);
 
       // Andy should look at the camera but still be flush with the plane.
-      lastAndy.transform.LookAt(m_firstPersonCamera.transform);
-      lastAndy.transform.rotation = Quaternion.Euler(0.0f,
-        lastAndy.transform.rotation.eulerAngles.y, lastAndy.transform.rotation.z);
+      andy.transform.LookAt(m_firstPersonCamera.transform);
+      andy.transform.rotation = Quaternion.Euler(0.0f,
+        andy.transform.rotation.eulerAngles.y, andy.transform.rotation.z);
 
       // Use a plane attachment component to maintain Andy's y-offset from the plane
       // (occurs after anchor updates).
-      lastAndy.GetComponent<PlaneAttachment>().Attach(hit.Plane);
+      andy.Attach(hit.Plane);
     }
   }
 
   void UpdateLastAndy() {
-    if (lastAndy == null) {
-      return;
-    }
-
     TrackableHit hit;
     TrackableHitFlag raycastFilter = TrackableHitFlag.PlaneWithinBounds | TrackableHitFlag.PlaneWithinPolygon;
 
     Vector2 center = new Vector2(Screen.width / 2f, Screen.height / 2f);
     if (Session.Raycast(m_firstPersonCamera.ScreenPointToRay(center), raycastFilter, out hit)) {
-      if (hit.Plane != lastAndy.GetComponent<PlaneAttachment>().m_AttachedPlane) {
-        return;
-      }
+      foreach (PlaneAttachment andy in andys) {
+        // if (hit.Plane != andy.m_AttachedPlane) {
+        //   continue;
+        // }
 
-      // Andy should look at the hit point but still be flush with the plane.
-      lastAndy.transform.LookAt(hit.Point);
-      lastAndy.transform.rotation = Quaternion.Euler(0.0f,
-        lastAndy.transform.rotation.eulerAngles.y, lastAndy.transform.rotation.z);
+        // Andy should look at the hit point but still be flush with the plane.
+        andy.transform.LookAt(hit.Point);
+        andy.transform.rotation = Quaternion.Euler(0.0f,
+          andy.transform.rotation.eulerAngles.y, andy.transform.rotation.z);
+
+        Vector3 target = andy.transform.position + andy.transform.forward * .1f;
+        target.x = Mathf.Clamp(target.x, -andy.m_AttachedPlane.Bounds.x / 2f, andy.m_AttachedPlane.Bounds.x / 2f);
+        target.z = Mathf.Clamp(target.z, -andy.m_AttachedPlane.Bounds.y / 2f, andy.m_AttachedPlane.Bounds.y / 2f);
+        andy.transform.position = target;
+      }
     }
   }
 
