@@ -5,7 +5,7 @@ using UnityEngine.Rendering;
 
 public class AndysController : MonoBehaviour {
 
-  int andyLayermask;
+  public Plane plane;
 
   /// The first-person camera being used to render the passthrough camera.
   public Camera m_firstPersonCamera;
@@ -20,6 +20,8 @@ public class AndysController : MonoBehaviour {
 
   /// A gameobject parenting UI for displaying the "searching for planes" snackbar.
   public GameObject m_searchingForPlaneUI;
+
+  int andyLayermask;
 
   private List<TrackedPlane> m_newPlanes = new List<TrackedPlane>();
 
