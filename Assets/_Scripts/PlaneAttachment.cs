@@ -23,6 +23,10 @@ public class PlaneAttachment : MonoBehaviour {
   /// Unity update.
   /// </summary>
   public void Update() {
+    if (m_AttachedPlane == null) {
+      return;
+    }
+    
     // If the plane has been subsumed switch attachment to the subsuming plane.
     while (m_AttachedPlane.SubsumedBy != null) {
       m_AttachedPlane = m_AttachedPlane.SubsumedBy;

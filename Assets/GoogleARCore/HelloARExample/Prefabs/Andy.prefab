@@ -20,7 +20,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4280309514915974}
   - component: {fileID: 114460997975901862}
-  m_Layer: 0
+  - component: {fileID: 136678405681875888}
+  - component: {fileID: 54656072362248916}
+  m_Layer: 8
   m_Name: Andy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -37,7 +39,7 @@ GameObject:
   - component: {fileID: 4553087980304550}
   - component: {fileID: 33515778104872740}
   - component: {fileID: 23357309348918826}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: AndyBlobShadow_GEO
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -52,7 +54,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4053639959727920}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Andy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -69,7 +71,7 @@ GameObject:
   - component: {fileID: 4579515492020152}
   - component: {fileID: 33800310737437648}
   - component: {fileID: 23808477452200100}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Andy_GEO
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -84,7 +86,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4468902080585984}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: AndyBlobShadow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -242,6 +244,21 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1313174400183544}
   m_Mesh: {fileID: 4300000, guid: 0e8c4400e5a274e79b60fa5a300aab17, type: 3}
+--- !u!54 &54656072362248916
+Rigidbody:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1190091649889860}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 84
+  m_CollisionDetection: 0
 --- !u!114 &114460997975901862
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -253,3 +270,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f72ee472a4654c10a96aeb3fcf25bcf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!136 &136678405681875888
+CapsuleCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1190091649889860}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.07
+  m_Height: 0.25
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.1, z: 0}

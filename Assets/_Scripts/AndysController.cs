@@ -3,30 +3,22 @@ using GoogleARCore;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-/// <summary>
-/// Controlls the HelloAR example.
-/// </summary>
 public class AndysController : MonoBehaviour {
-  /// <summary>
+
+  int andyLayermask;
+
   /// The first-person camera being used to render the passthrough camera.
-  /// </summary>
   public Camera m_firstPersonCamera;
 
-  /// <summary>
   /// A prefab for tracking and visualizing detected planes.
-  /// </summary>
   public GameObject m_trackedPlanePrefab;
 
-  /// <summary>
   /// A model to place when a raycast from a user touch hits a plane.
-  /// </summary>
   public GameObject m_andyAndroidPrefab;
 
   public List<PlaneAttachment> andys = new List<PlaneAttachment>();
 
-  /// <summary>
   /// A gameobject parenting UI for displaying the "searching for planes" snackbar.
-  /// </summary>
   public GameObject m_searchingForPlaneUI;
 
   private List<TrackedPlane> m_newPlanes = new List<TrackedPlane>();
@@ -51,9 +43,20 @@ public class AndysController : MonoBehaviour {
     new Color(1.0f, 0.756f, 0.027f)
   };
 
-  /// <summary>
-  /// The Unity Update() method.
-  /// </summary>
+  void Awake() {
+    andyLayermask = LayerMask.GetMask(new string[] { "Andy" });
+  }
+
+  void OnApplicationPause(bool pause) {
+    if (pause) {
+      // All anchors are lost on pause.
+      foreach (PlaneAttachment andy in andys) {
+        Destroy(andy.transform.parent.gameObject);
+      }
+      andys.Clear();
+    }
+  }
+
   public void Update() {
     _QuitOnConnectionErrors();
 
@@ -100,6 +103,23 @@ public class AndysController : MonoBehaviour {
       return;
     }
 
+    RaycastHit raycastHit;
+    Ray ray = Camera.main.ScreenPointToRay(touch.position);
+    bool found = Physics.Raycast(ray, out raycastHit, 1000f, andyLayermask);
+
+    if (found) {
+      if (raycastHit.transform != null) {
+        PlaneAttachment a = raycastHit.transform.gameObject.GetComponent<PlaneAttachment>();
+        if (andys.Contains(a)) {
+          andys.Remove(a);
+          Transform holder = a.transform.parent;
+          // Transform anchor = holder.parent;
+          Destroy(holder.gameObject);
+          return;
+        }
+      }
+    }
+
     TrackableHit hit;
     TrackableHitFlag raycastFilter = TrackableHitFlag.PlaneWithinBounds | TrackableHitFlag.PlaneWithinPolygon;
 
@@ -108,10 +128,13 @@ public class AndysController : MonoBehaviour {
       // world evolves.
       var anchor = Session.CreateAnchor(hit.Point, Quaternion.identity);
 
-      // Intanstiate an Andy Android object as a child of the anchor; it's transform will now benefit
+      // Intanstiate a holder object as a child of the anchor; it's transform will now benefit
       // from the anchor's tracking.
+      Transform holder = new GameObject("holder").transform;
+      holder.SetParent(anchor.transform, false);
+
       PlaneAttachment andy = Instantiate(m_andyAndroidPrefab, hit.Point, Quaternion.identity,
-        anchor.transform).GetComponent<PlaneAttachment>();
+        holder).GetComponent<PlaneAttachment>();
       andys.Add(andy);
 
       // Andy should look at the camera but still be flush with the plane.
@@ -141,17 +164,18 @@ public class AndysController : MonoBehaviour {
         andy.transform.rotation = Quaternion.Euler(0.0f,
           andy.transform.rotation.eulerAngles.y, andy.transform.rotation.z);
 
-        Vector3 target = andy.transform.position + andy.transform.forward * .1f;
-        target.x = Mathf.Clamp(target.x, -andy.m_AttachedPlane.Bounds.x / 2f, andy.m_AttachedPlane.Bounds.x / 2f);
-        target.z = Mathf.Clamp(target.z, -andy.m_AttachedPlane.Bounds.y / 2f, andy.m_AttachedPlane.Bounds.y / 2f);
-        andy.transform.position = target;
+        if (Vector3.Distance(hit.Point, andy.transform.position) >.1f) {
+          andy.GetComponent<Rigidbody>().velocity = andy.transform.forward * .1f;
+        } else {
+          andy.GetComponent<Rigidbody>().velocity = Vector3.zero;
+          // avoid spin in place
+          continue;
+        }
       }
     }
   }
 
-  /// <summary>
   /// Quit the application if there was a connection error for the ARCore session.
-  /// </summary>
   private void _QuitOnConnectionErrors() {
     // Do not update if ARCore is not tracking.
     if (Session.ConnectionState == SessionConnectionState.DeviceNotSupported) {
@@ -166,11 +190,7 @@ public class AndysController : MonoBehaviour {
     }
   }
 
-  /// <summary>
   /// Show an Android toast message.
-  /// </summary>
-  /// <param name="message">Message string to show in the toast.</param>
-  /// <param name="length">Toast message time length.</param>
   private static void _ShowAndroidToastMessage(string message) {
     AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
     AndroidJavaObject unityActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
