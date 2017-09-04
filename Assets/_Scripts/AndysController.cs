@@ -5,7 +5,8 @@ using UnityEngine.Rendering;
 
 public class AndysController : MonoBehaviour {
 
-  public Plane plane;
+  public GameObject planeVisualizerPrefab;
+  List<GameObject> visualizedPlanes = new List<GameObject>();
 
   /// The first-person camera being used to render the passthrough camera.
   public Camera m_firstPersonCamera;
@@ -87,13 +88,22 @@ public class AndysController : MonoBehaviour {
       planeObject.GetComponent<Renderer>().material.SetFloat("_UvRotation", Random.Range(0.0f, 360.0f));
     }
 
+    foreach(GameObject go in visualizedPlanes) {
+      Destroy(go);
+    }
+    visualizedPlanes.Clear();
+
+
     // Disable the snackbar UI when no planes are valid.
     bool showSearchingUI = true;
     Frame.GetAllPlanes(ref m_allPlanes);
     for (int i = 0; i < m_allPlanes.Count; i++) {
       if (m_allPlanes[i].IsValid) {
         showSearchingUI = false;
-        break;
+        // break;
+        GameObject planeVisualizer = Instantiate(planeVisualizerPrefab, m_allPlanes[i].Position, m_allPlanes[i].Rotation);
+        planeVisualizer.transform.localScale = new Vector3(m_allPlanes[i].Bounds.x, 0f, m_allPlanes[i].Bounds.y);
+        visualizedPlanes.Add(planeVisualizer);
       }
     }
 
@@ -167,7 +177,7 @@ public class AndysController : MonoBehaviour {
           andy.transform.rotation.eulerAngles.y, andy.transform.rotation.z);
 
         if (Vector3.Distance(hit.Point, andy.transform.position) >.1f) {
-          andy.GetComponent<Rigidbody>().velocity = andy.transform.forward * .1f;
+          andy.GetComponent<Rigidbody>().velocity = andy.transform.forward.normalized * 1f;
         } else {
           andy.GetComponent<Rigidbody>().velocity = Vector3.zero;
           // avoid spin in place
