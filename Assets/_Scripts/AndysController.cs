@@ -102,7 +102,7 @@ public class AndysController : MonoBehaviour {
         showSearchingUI = false;
         // break;
         GameObject planeVisualizer = Instantiate(planeVisualizerPrefab, m_allPlanes[i].Position, m_allPlanes[i].Rotation);
-        planeVisualizer.transform.localScale = new Vector3(m_allPlanes[i].Bounds.x, 0f, m_allPlanes[i].Bounds.y);
+        planeVisualizer.transform.localScale = new Vector3(m_allPlanes[i].Bounds.x, 1f, m_allPlanes[i].Bounds.y);
         visualizedPlanes.Add(planeVisualizer);
       }
     }
@@ -176,12 +176,10 @@ public class AndysController : MonoBehaviour {
         andy.transform.rotation = Quaternion.Euler(0.0f,
           andy.transform.rotation.eulerAngles.y, andy.transform.rotation.z);
 
-        if (Vector3.Distance(hit.Point, andy.transform.position) >.1f) {
+        if (Vector3.Distance(hit.Point, andy.transform.position) > .1f) {
           andy.GetComponent<Rigidbody>().velocity = andy.transform.forward.normalized * 1f;
         } else {
           andy.GetComponent<Rigidbody>().velocity = Vector3.zero;
-          // avoid spin in place
-          continue;
         }
       }
     }
